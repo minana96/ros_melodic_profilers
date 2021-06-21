@@ -46,7 +46,6 @@ class INA219ProfilerServer:
                 self.__start_time = int(start_time * 1000)
                 arduino_start_time = int(self.__profiler_serial.readline().decode('utf-8').rstrip())
                 self.__time_correction = self.__start_time - arduino_start_time
-                rospy.loginfo("Correction: {}".format(self.__time_correction))
                 break
 
         return {
