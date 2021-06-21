@@ -74,10 +74,10 @@ class ResourceProfilerServer:
 
         while self.__thread_running:
             # Add current time, CPU utilisation and memory utilisation in the dictionary
-            self.__data['timestamp'].append(int(time.time() * 1000))
-            self.__data['cpu_util'].append(psutil.cpu_percent(interval=0.0))
+            self.__data['timestamps'].append(int(time.time() * 1000))
+            self.__data['cpu'].append(psutil.cpu_percent(interval=0.0))
             virtual_memory = psutil.virtual_memory()
-            self.__data['memory_util'].append(virtual_memory.total - virtual_memory.available)
+            self.__data['mem'].append(virtual_memory.total - virtual_memory.available)
 
             self.__ros_rate.sleep()
                 
