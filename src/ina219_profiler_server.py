@@ -2,8 +2,6 @@
 
 import rospy
 import time
-import os
-import errno
 import serial
 
 from ros_profilers_msgs.srv import StartPowerMeasurements, StopPowerMeasurements
