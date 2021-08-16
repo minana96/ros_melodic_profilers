@@ -1,0 +1,12 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="frequency" default="10.0"/>
+
+  <!-- resource_profiler -->
+  <node pkg="ros_melodic_profilers" type="cpu_mem_profiler_server.py" name="resource_profiler" output="screen">
+    <param name="frequency" value="$(arg frequency)" />
+  </node>
+
+  <!-- ina219_profiler-->
+  <node pkg="ros_melodic_profilers" type="ina219_profiler_server.py" name="ina219_profiler" output="screen"/>
+</launch>
