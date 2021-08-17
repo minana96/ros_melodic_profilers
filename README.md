@@ -1,41 +1,34 @@
 # *ros_melodic_profilers* ROS package
 
-This repository represents the *ros_melodic_profilers* ROS pacakge, the package that configures and launches SLAM task via [gmapping](http://wiki.ros.org/gmapping) ROS package. The *sherlock_slam* package is intended for ROS Melodic. The repository needs to be cloned to the catkin workspace on the robot (no need to clone it to the PC) and compiled with following commands:
+This repository represents the *ros_melodic_profilers* ROS pacakge, the package that configures and launches ROS nodes that collect power consumption, CPU usage and RAM utilisation measurements. The *ros_melodic_profilers* package is intended for ROS Melodic. The repository needs to be cloned to the catkin workspace on the robot (no need to clone it to the PC) and compiled with following commands:
 ```bash
 cd <catkin_ws_dir>/src
-git clone git@github.com:minana96/sherlock_slam.git
+git clone git@github.com:minana96/ros_melodic_profilers.git
 cd ..
 catkin_make
 ```
 
 ## Dependencies
 
-The package is dependent on *gmapping* ROS pacakge, which can be installed with the following command:
-```bash
-sudo apt install ros-melodic-gmapping
-```
+The package is dependent on *ros_profilers_msgs* ROS pacakge, which contains definitions of service messages. The instruction on how to configure and install the *ros_profilers_msgs* package are given in [this](https://github.com/minana96/ros_profilers_msgs) GitHub repository. The services are provided by the ROS nodes in *ros_melodic_profilers* repositories, yet they are consumed from the Robot Runner tool that runs on the PC. Since both entities require service definitions, they are separate within the dedicated *ros_profilers_msgs* package.
+
+The source code for the nodes described below is written in Python 2.7, as this is the default Python version for ROS Melodic. The following pip packages need to be installed: **pyserial** and **psutil**.
 
 ## Package content
 
-The package consists of three directories, namely, *config*, *launch* and *maps*.
+The package consists of three directories, namely, *arduino*, *launch* and *src*.
 
-### config
+### arduino
 
-The direcotry contains parameter configuration for *gmapping* ROS node in *yaml* format that are passed as arguments when the node is launched. The definitions of possible *gmapping* parameters are available in the [ROS wiki page](http://wiki.ros.org/gmapping):
-- **gmapping_params.yaml**: the default configuration used in all experiments, with *particles* set to 5 and *temporalUpdate* set to -1 (i.e., turned off);
-- **particles_30.yaml**: the configuration used in the number of particles effect experiment, where *particles* parameter is set to 30 for respective treatments; 
-- **temporal_updates_on.yaml**: the configuration used in the temporal updates effect experiment, where *temporalUpdate* parameter is set to 0.5 for respective treatments (i.e., temporal updates turned on). 
+The power measurements are collected by the Arduino Nano Every board, which has INA219 current sensor attached. The detailed guide on how to connect the Arduino board and sensor is available in [here](https://github.com/S2-group/ros-configurations/tree/main/meter-arduino). The *ina219sensor.ino* file, containing the code for power measurement collection, is located in the *arduino* directory of this repository.
+
+### src
+
+This directory contains source code of two ROS nodes:
+- **cpu_mem_profiler_server.py**: the ROS node that provides ROS services for starting and stopping the CPU usage and RAM utilisation measurement collection. The measurements are obtained via *psutil* Python package and the measurement results are returned to the service client upon stopping the measurement collection;
+- **ina219_profiler_server.py**: the ROS node that provides ROS services for starting and stopping the power consumption measurement collection. The measurements are obtained via requests sent to the Arduino board over the serial connection with *pyserial* Python package. The measurement results are returned to the service client upon stopping the measurement collection.
+
 
 ### launch
 
-The SLAM task is configured and launched via two launch files:
-- **sherlock_slam.launch**: SLAM is launched on the local machine, with the possibility of visualisation in [Rviz](http://wiki.ros.org/rviz) tool. If this option is used, both Rviz and *turtlebot3_slam* ROS package need to be installed with following commands:
-```bash
-sudo apt install ros-melodic-rviz
-sudo apt install ros-melodic-turtlebot3-slam
-```
-- **sherlock_slam_remote.launch**: SLAM is launched on the remote machine that is passed as a parameter. If this launch file is used, it is important that the *gmapping* ROS package is also installed on the target remote machine.
-
-### maps  
-
-The directory contains the maps of the robot arena, created with *gmapping* while the robot is teleoperated around the environment. The map is represented with both *arena_gallery.yaml* and *arena_gallery.pgm* files. The instructions on how to create and save a map of a custom environment with TurtleBot3 are presented in [here](https://emanual.robotis.com/docs/en/platform/turtlebot3/slam/).
+Both profiler ROS nodes are configured and launched in **profilers.launch** file. While the frequency of power measurement collection is fixed to 200Hz, the frequency of CPU usage and RAM utilisation measurement collection can be adjusted via launch file parameter.
