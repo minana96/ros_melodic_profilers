@@ -26,7 +26,15 @@ The power measurements are collected by the Arduino Nano Every board, which has 
 
 This directory contains source code of two ROS nodes:
 - **cpu_mem_profiler_server.py**: the ROS node that provides ROS services for starting and stopping the CPU usage and RAM utilisation measurement collection. The measurements are obtained via *psutil* Python package and the measurement results are returned to the service client upon stopping the measurement collection;
-- **ina219_profiler_server.py**: the ROS node that provides ROS services for starting and stopping the power consumption measurement collection. The measurements are obtained via requests sent to the Arduino board over the serial connection with *pyserial* Python package. The measurement results are returned to the service client upon stopping the measurement collection.
+- **ina219_profiler_server.py**: the ROS node that provides ROS services for starting and stopping the power consumption measurement collection. The measurements are obtained via requests sent to the Arduino board over the serial connection with *pyserial* Python package. The measurement results are returned to the service client upon stopping the measurement collection. The serial *port*, over which the Arduino board is connected, is named as */dev/ttyArduino*. It is important to set *ttyArduino* value to that port in file located in `/etc/udev/rules.d/99-turtlebot3-cdc.rules`. The line representing the rule for Arduino board:
+```bash
+ATTRS{idVendor}=="2341" ATTRS{idProduct}=="0058", ENV{ID_MM_DEVICE_IGNORE}="1", MODE:="0666"
+```
+ should be adjusted to:
+```bash
+ATTRS{idVendor}=="2341" ATTRS{idProduct}=="0058", ENV{ID_MM_DEVICE_IGNORE}="1", MODE:="0666, SYMLINK+="ttyArduino"
+```
+This is done to prevent collision of port names with OpenCR board or other devices connected to the robot over serial connectiion.
 
 
 ### launch
